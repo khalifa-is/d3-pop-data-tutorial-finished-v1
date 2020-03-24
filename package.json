@@ -1,0 +1,27 @@
+{
+  "name": "d3-pop-data-tutorial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khalifa-is/d3-pop-data-tutorial.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/khalifa-is/d3-pop-data-tutorial/issues"
+  },
+  "homepage": "https://github.com/khalifa-is/d3-pop-data-tutorial#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}

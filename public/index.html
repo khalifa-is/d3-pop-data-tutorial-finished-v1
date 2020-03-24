@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>D3 Tutorial</title>
+    <style>
+        #graphArea {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <a href="#" class="navbar-brand">Dank Data</a>
+    </nav>
+    <main class="container">
+        <div id="graphArea"></div>
+    </main>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script>
+        const getCountryData = async (countryCode, callback) => {
+            const url = `http://localhost:3000/data?code=${countryCode}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            callback(data[1].filter(d => d.value));
+        };
+
+        const drawGraph = (data) => {
+            const margin = { top: 30, right: 30, bottom: 70, left: 90 };
+            const width = 820 - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
+
+            let mouseover = function(d) {
+                tooltip
+                .style("opacity", 1)
+            };
+
+            let mousemove = function(d) {
+                const x0 = x.invert(d3.mouse(this)[0]);
+                const decimal = x0 - parseInt(x0);
+                const i = decimal > 0.5 ? parseInt(x0) : parseInt(x0) - 1;
+                let selected = data.find(e => e.date == i);
+                if (selected) {
+                    tooltip
+                    .html(`Date: ${selected.date}, Population: ${(selected.value)}`)
+                    .style("left", (d3.mouse(this)[0]+ 110) + "px")
+                    .style("top", (d3.mouse(this)[1] - 20) + "px");
+                }
+            };
+
+            let mouseleave = function(d) {
+                tooltip
+                .transition()
+                .duration(200)
+                .style("opacity", 0)
+            };
+
+            let tooltip = d3.select("#graphArea")
+            .append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-color", "#64FF8B")
+            .style("border-width", "1px")
+            .style("border-radius", "5px")
+            .style("padding", "10px");
+
+            let svg = d3.select("#graphArea")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left}, ${margin.top})`)
+            .on("mouseleave", mouseleave);
+
+            let x = d3.scaleLinear()
+            .domain(d3.extent(data, d => parseInt(d.date)))
+            .range([0, width]);
+
+            svg.append("g")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(x));
+
+            let y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => parseInt(d.value)) * 1.2])
+            .range([height, 0]);
+
+            svg.append("g")
+            .call(d3.axisLeft(y));
+
+            svg
+            .append("g")
+            .append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "#64FF8B")
+            .attr("stroke-width", 1.5)
+            .attr("d",
+            d3.line()
+            .x(d => x(d.date))
+            .y(d => y(d.value)));
+
+            svg.append("text")
+            .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
+            .style("text-anchor", "middle")
+            .text("Year");
+
+            svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -7 - margin.left)
+            .attr("x", 0 - (height / 2))
+            .attr("dy", "1.2em")
+            .style("text-anchor", "middle")
+            .text("Population (millions)");
+
+            svg
+            .append("text")
+            .attr("transform", "translate(100,0)")
+            .attr("x", 50)
+            .attr("y", 0)
+            .attr("font-size", "24px")
+            .text("Population in Nigeria (1960-2017)");
+
+            svg
+            .append('rect')
+            .style("fill", "none")
+            .style("pointer-events", "all")
+            .attr('width', width)
+            .attr('height', height)
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove);
+
+        }
+
+        getCountryData("NG", (data) => {
+            drawGraph(data);
+        });
+
+    </script>
+</body>
+</html>
