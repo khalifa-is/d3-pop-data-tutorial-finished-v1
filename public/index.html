@@ -28,7 +28,7 @@
             const url = `http://localhost:3000/data?code=${countryCode}`;
             const response = await fetch(url);
             const data = await response.json();
-            callback(data.filter(d => d.value));
+            callback(data[1].filter(d => d.value));
         };
 
         const drawGraph = (data) => {
